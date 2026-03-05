@@ -1,6 +1,6 @@
 # Nick Mora — Airbnb Cleaning Automation
 
-**Client:** Nicolas Mora (nickmora92@yahoo.com)
+**Client:** Nicolas Mora (<nickmora92@yahoo.com>)
 **Project:** Automated cleaner dispatch + two-way Telegram communication
 **Status:** Production-ready — bugs fixed, pending go-live with real data
 **Pricing:** $8/mo flat retainer (no setup fee, unlimited properties)
@@ -10,7 +10,7 @@
 
 ## Architecture Overview
 
-```
+```text
   Airbnb iCal Feed
        |
        v
@@ -43,7 +43,7 @@
 ## Stack
 
 | Component | Tech | Cost |
-|---|---|---|
+| --- | --- | --- |
 | Orchestration | N8N (self-hosted, Docker) | $0 |
 | Hosting | OpenYogaClaw (Ubuntu VPS) | Already paid |
 | Messaging | Telegram Bot API (@NickCleanBot) | $0 |
@@ -54,8 +54,10 @@
 ## N8N Workflows (all ACTIVE)
 
 ### 1. Booking Monitor (`NLVOii3Hl4hTz8qc`)
+
 **Trigger:** Schedule — every 30 minutes
 **Flow:**
+
 1. `Check Every 30 Minutes` — schedule trigger
 2. `Fetch Airbnb Calendar` — HTTP GET to iCal URL
 3. `Parse iCal & Find Checkouts` — extracts events with checkout in next 48 hours
@@ -70,11 +72,14 @@
 **iCal URL:** Set via `AIRBNB_ICAL_URL_NICK` env var (currently pointed at demo calendar on localhost:8199)
 
 ### 2. Cleaner Dispatch (`eJIAwYSzGEzIW51S`)
+
 **Triggers:**
+
 - Webhook POST to `/nick-cleaner-dispatch` (called by Booking Monitor)
 - Schedule — 8 AM daily morning check (via `Morning Check Payload` code node)
 
 **Flow:**
+
 1. `Dispatch Trigger` / `Morning Dispatch Check` — entry points
 2. `Morning Check Payload` — (8 AM only) builds default payload with today's date and property address
 3. `AI Compose Cleaning Message` — builds personalized message:
@@ -88,8 +93,10 @@
 5. `Log Dispatch to Sheets` — appends to "Dispatch Log" tab
 
 ### 3. Inbound Handler (`vFIvxqFZKZFGOUO7`)
+
 **Trigger:** Schedule — polls Telegram every 1 minute
 **Flow:**
+
 1. `Poll Telegram Every Minute` — schedule trigger
 2. `Get Telegram Updates` — GET `/getUpdates` from Bot API
 3. `Process & Filter Updates` — filters by allowed chat ID (env var), classifies messages, returns single item with maxUpdateId + packed messages array
@@ -98,7 +105,7 @@
 6. `Route by Type` — switch node (v3.2), branches to:
 
 | Type | Action | Notify Nick? |
-|---|---|---|
+| --- | --- | --- |
 | `job_complete` | Log to Sheets + send "Thank you!" ack to cleaner | No (logged only) |
 | `maintenance_issue` | Log to Sheets + alert Nick via Telegram | **Yes** (high priority) |
 | `question` | Log to Sheets + forward to Nick via Telegram | **Yes** |
@@ -107,7 +114,7 @@
 ## Bugs Fixed (March 2026)
 
 | Bug | Fix |
-|---|---|
+| --- | --- |
 | Monitor → Dispatch had no connection (dead end) | Added `Trigger Dispatch` HTTP Request node that POSTs to dispatch webhook |
 | Morning Dispatch Check connected to nothing | Added `Morning Check Payload` code node wired to `AI Compose Cleaning Message` |
 | Hardcoded chat ID `PLACEHOLDER_CHAT_ID` in Inbound Handler | Now reads from `$env.NICK_CLEANER_TELEGRAM_CHAT_ID` with fallback |
@@ -123,7 +130,7 @@
 ## Environment Variables (in N8N Docker)
 
 | Variable | Value | Description |
-|---|---|---|
+| --- | --- | --- |
 | `TELEGRAM_BOT_TOKEN` | `8772704912:AAFA5uB-...` | @NickCleanBot token |
 | `NICK_CLEANER_TELEGRAM_CHAT_ID` | `PLACEHOLDER_CHAT_ID` | Test cleaner (Joe) |
 | `NICK_TRACKER_SHEET_ID` | `16kftTiwJs6VmNVr...` | Google Sheets tracker |
@@ -136,7 +143,7 @@
 ## Telegram Bot
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Bot name | NickCleanBot |
 | Username | @NickCleanBot |
 | Bot ID | 8772704912 |
@@ -148,6 +155,7 @@
 **Sheet ID:** `16kftTiwJs6VmNVrdGag4L9vh7JAfCKMKeRbphlQGPnU`
 
 **Tabs:**
+
 - `Bookings` — all detected checkout events (from Booking Monitor)
 - `Dispatch Log` — every message sent to cleaner (from Cleaner Dispatch)
 - `Job Log` — cleaner replies classified as job_complete (from Inbound Handler)
@@ -157,7 +165,7 @@
 Served from `localhost:8199/demo-calendar.ics` — for development/testing only.
 
 | Guest | Check-in | Check-out | Nights | Notes |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | John Smith (2 guests) | Mar 3 | **Mar 5** | 2 | — |
 | Maria Garcia (1 guest) | Mar 5 | **Mar 6** | 1 | Pet-friendly |
 | David Kim (4 guests) | Mar 6 | **Mar 9** | 3 | Family with kids |
@@ -189,7 +197,7 @@ When Nick is ready to go live, swap these env vars and do these manual steps:
 ## Files
 
 | File | Description |
-|---|---|
+| --- | --- |
 | `workflow-monitor-live.json` | Booking Monitor workflow (n8n export) |
 | `workflow-dispatch-live.json` | Cleaner Dispatch workflow (n8n export) |
 | `workflow-inbound-live.json` | Inbound Message Handler workflow (n8n export) |
@@ -200,7 +208,7 @@ When Nick is ready to go live, swap these env vars and do these manual steps:
 ## Pricing Model
 
 | | Turno (competitor) | Our solution |
-|---|---|---|
+| --- | --- | --- |
 | Per unit | ~$8/property/mo | $8/mo flat (unlimited) |
 | Setup fee | Varies | $0 |
 | Messaging | Built-in (limited) | Telegram ($0) |
