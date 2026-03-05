@@ -1,0 +1,430 @@
+{
+  "name": "Airbnb Inbound Message Handler — Nick Mora",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "poll-telegram",
+      "name": "Poll Telegram Every Minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/getUpdates",
+        "authentication": "none",
+        "sendBody": false,
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "get-updates",
+      "name": "Get Telegram Updates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process Telegram updates and filter for new ones\nconst response = $input.first().json;\nconst updates = response.result || [];\n\nif (updates.length === 0) {\n  return [];\n}\n\n// Get the last processed update ID from static data\nconst staticData = $input.item?.staticData || {};\nconst lastUpdateId = staticData.lastUpdateId || 0;\n\n// Filter for new updates only\nconst newUpdates = updates.filter(u => u.update_id > lastUpdateId);\n\nif (newUpdates.length === 0) {\n  return [];\n}\n\n// Update the last processed ID\nconst maxUpdateId = Math.max(...newUpdates.map(u => u.update_id));\n\n// Process each new update\nconst processed = newUpdates.map(update => {\n  let from = '';\n  let chatId = '';\n  let text = '';\n  let updateId = update.update_id.toString();\n\n  if (update.callback_query) {\n    from = update.callback_query.from.id.toString();\n    chatId = update.callback_query.message.chat.id.toString();\n    text = update.callback_query.data || '';\n  } else if (update.message) {\n    from = update.message.from.id.toString();\n    chatId = update.message.chat.id.toString();\n    text = update.message.text || '';\n  }\n\n  // Only process messages from the cleaner (chat_id PLACEHOLDER_CHAT_ID)\n  if (chatId !== 'PLACEHOLDER_CHAT_ID') {\n    return null;\n  }\n\n  // Classify the message\n  const lowerText = text.toLowerCase().trim();\n  let messageType = 'unknown';\n  let priority = 'normal';\n\n  const doneKeywords = ['done', 'finished', 'complete', 'completed', 'all done', 'cleaned', 'all good', 'all set', '✅', 'done!'];\n  const issueKeywords = ['broken', 'damage', 'damaged', 'fix', 'repair', 'issue', 'problem', 'stain', 'missing', 'leak', 'mold', 'crack', 'hole', '🚨'];\n  const questionKeywords = ['?', 'where', 'when', 'what', 'how', 'which', 'can i', 'should i', 'do i', 'help'];\n\n  if (doneKeywords.some(kw => lowerText.includes(kw))) {\n    messageType = 'job_complete';\n  } else if (issueKeywords.some(kw => lowerText.includes(kw))) {\n    messageType = 'maintenance_issue';\n    priority = 'high';\n  } else if (questionKeywords.some(kw => lowerText.includes(kw))) {\n    messageType = 'question';\n  } else {\n    messageType = 'general';\n  }\n\n  return {\n    json: {\n      from: from,\n      chat_id: chatId,\n      text: text,\n      messageType: messageType,\n      priority: priority,\n      updateId: updateId,\n      maxUpdateId: maxUpdateId,\n      receivedAt: new Date().toISOString()\n    }\n  };\n}).filter(u => u !== null);\n\nif (processed.length === 0) {\n  return [];\n}\n\nreturn processed;"
+      },
+      "id": "process-updates",
+      "name": "Process & Filter Updates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Store the last update ID for next run\nconst maxUpdateId = $input.first().json.maxUpdateId;\n\n// This node just passes through but sets up static data for next run\nreturn $input.all();"
+      },
+      "id": "update-state",
+      "name": "Update State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputIndex": 0,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "job_complete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputName": "Job Complete"
+            },
+            {
+              "outputIndex": 1,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "maintenance_issue",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputName": "Maintenance Issue"
+            },
+            {
+              "outputIndex": 2,
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "question",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputName": "Question"
+            }
+          ],
+          "fallbackOutput": {
+            "active": true
+          }
+        }
+      },
+      "id": "route-message",
+      "name": "Route by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.NICK_TRACKER_SHEET_ID || '16kftTiwJs6VmNVrdGag4L9vh7JAfCKMKeRbphlQGPnU' }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Job Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "from": "={{ $json.from }}",
+            "message": "={{ $json.text }}",
+            "type": "={{ $json.messageType }}",
+            "status": "completed",
+            "received_at": "={{ $json.receivedAt }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-complete",
+      "name": "Log Job Complete",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1200, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $env.NICK_TELEGRAM_CHAT_ID || 'PLACEHOLDER_CHAT_ID' }}"
+            },
+            {
+              "name": "text",
+              "value": "🚨 *Maintenance Alert!* \\n\\nCleaner reported an issue:\\n{{ $json.text }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "alert-nick",
+      "name": "Alert Nick (Issue)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.NICK_TRACKER_SHEET_ID || '16kftTiwJs6VmNVrdGag4L9vh7JAfCKMKeRbphlQGPnU' }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Job Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "from": "={{ $json.from }}",
+            "message": "={{ $json.text }}",
+            "type": "={{ $json.messageType }}",
+            "status": "issue_reported",
+            "received_at": "={{ $json.receivedAt }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-issue",
+      "name": "Log Maintenance Issue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1200, 500]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $env.NICK_TELEGRAM_CHAT_ID || 'PLACEHOLDER_CHAT_ID' }}"
+            },
+            {
+              "name": "text",
+              "value": "❓ *Question from Cleaner*\\n\\n{{ $json.text }}\\n\\n_Replying here will send to the cleaner._"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "forward-question",
+      "name": "Forward Question to Nick",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 600]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.NICK_TRACKER_SHEET_ID || '16kftTiwJs6VmNVrdGag4L9vh7JAfCKMKeRbphlQGPnU' }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Job Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "from": "={{ $json.from }}",
+            "message": "={{ $json.text }}",
+            "type": "={{ $json.messageType }}",
+            "status": "question",
+            "received_at": "={{ $json.receivedAt }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-question",
+      "name": "Log Question",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1200, 700]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $json.chat_id }}"
+            },
+            {
+              "name": "text",
+              "value": "Thanks for the update! Got it logged. ✅"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "acknowledge-general",
+      "name": "Acknowledge General",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 900]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $json.chat_id }}"
+            },
+            {
+              "name": "text",
+              "value": "Great! Job marked as complete. ✅ Nick will be notified. Thanks!"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "acknowledge-complete",
+      "name": "Acknowledge Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 100]
+    }
+  ],
+  "connections": {
+    "Poll Telegram Every Minute": {
+      "main": [
+        [
+          {
+            "node": "Get Telegram Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Telegram Updates": {
+      "main": [
+        [
+          {
+            "node": "Process & Filter Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process & Filter Updates": {
+      "main": [
+        [
+          {
+            "node": "Update State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update State": {
+      "main": [
+        [
+          {
+            "node": "Route by Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Type": {
+      "main": [
+        [
+          {
+            "node": "Log Job Complete",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Acknowledge Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alert Nick (Issue)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Maintenance Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Forward Question to Nick",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Question",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Acknowledge General",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-03-04T21:00:00.000Z",
+  "versionId": "1"
+}

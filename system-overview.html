@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airbnb Cleaning Automation — System Overview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #1a1a2e;
+    background: #fff;
+    line-height: 1.6;
+  }
+
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    padding: 0.6in 0.7in;
+    page-break-after: always;
+    position: relative;
+  }
+
+  .page:last-child { page-break-after: avoid; }
+
+  /* COVER PAGE */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    color: #fff;
+    min-height: 11in;
+    padding: 1in;
+  }
+
+  .cover-icon {
+    font-size: 72px;
+    margin-bottom: 24px;
+  }
+
+  .cover h1 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #fff, #a8c0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cover .subtitle {
+    font-size: 20px;
+    font-weight: 300;
+    color: #a8b4d4;
+    margin-bottom: 40px;
+  }
+
+  .cover .client-badge {
+    display: inline-block;
+    padding: 10px 28px;
+    border: 2px solid rgba(168, 192, 255, 0.3);
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #a8c0ff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .cover-footer {
+    position: absolute;
+    bottom: 0.8in;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #6b7394;
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  .cover-footer .brand {
+    font-weight: 600;
+    color: #a8c0ff;
+  }
+
+  /* SECTION HEADERS */
+  .section-num {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #302b63, #24243e);
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 36px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+
+  .section-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.5px;
+  }
+
+  .section-title span { vertical-align: middle; }
+
+  /* ARCHITECTURE DIAGRAM */
+  .diagram-container {
+    background: #fafbff;
+    border: 1px solid #e2e6f0;
+    border-radius: 16px;
+    padding: 36px 24px;
+    margin: 20px 0 28px 0;
+  }
+
+  .diagram-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .diagram-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 160px;
+    position: relative;
+  }
+
+  .node-icon { font-size: 28px; margin-bottom: 6px; }
+  .node-label { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+  .node-sub { font-size: 11px; color: #6b7394; margin-top: 2px; }
+
+  .node-airbnb { background: #ff5a5f20; border: 2px solid #ff5a5f; }
+  .node-n8n { background: #ea4b7120; border: 2px solid #ea4b71; }
+  .node-telegram { background: #0088cc20; border: 2px solid #0088cc; }
+  .node-sheets { background: #34a85320; border: 2px solid #34a853; }
+  .node-nick { background: #f9a82520; border: 2px solid #f9a825; }
+  .node-cleaner { background: #7c4dff20; border: 2px solid #7c4dff; }
+
+  .arrow-down {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+    color: #8b92b0;
+    font-size: 22px;
+  }
+
+  .arrow-label {
+    font-size: 10px;
+    color: #8b92b0;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 8px;
+  }
+
+  .diagram-split {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 4px;
+  }
+
+  .diagram-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 16px;
+    background: #c8cde0;
+  }
+
+  .connector-h {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .connector-h-line {
+    width: 40px;
+    height: 2px;
+    background: #c8cde0;
+  }
+
+  /* FLOW STEPS */
+  .flow-steps {
+    margin: 20px 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #302b63, #5b4d9e);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    margin-right: 18px;
+    box-shadow: 0 4px 12px rgba(48, 43, 99, 0.25);
+  }
+
+  .step-content h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    font-size: 13.5px;
+    color: #4a4f6a;
+    line-height: 1.55;
+  }
+
+  .step-connector {
+    position: absolute;
+    left: 21px;
+    top: 48px;
+    width: 2px;
+    height: calc(100% - 24px);
+    background: #e2e6f0;
+  }
+
+  /* RESPONSE TYPES TABLE */
+  .response-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e6f0;
+  }
+
+  .response-table th {
+    background: #302b63;
+    color: #fff;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+  }
+
+  .response-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f1f5;
+    color: #4a4f6a;
+  }
+
+  .response-table tr:last-child td { border-bottom: none; }
+  .response-table tr:nth-child(even) td { background: #fafbff; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-green { background: #d4edda; color: #155724; }
+  .badge-red { background: #f8d7da; color: #721c24; }
+  .badge-blue { background: #d1ecf1; color: #0c5460; }
+  .badge-gray { background: #e9ecef; color: #495057; }
+
+  /* KEY BENEFITS */
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .benefit-card {
+    background: #fafbff;
+    border: 1px solid #e2e6f0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .benefit-icon { font-size: 32px; margin-bottom: 8px; }
+  .benefit-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+  .benefit-desc { font-size: 12px; color: #6b7394; }
+
+  /* COMPARISON */
+  .comparison-row {
+    display: flex;
+    gap: 20px;
+    margin: 16px 0;
+  }
+
+  .comparison-card {
+    flex: 1;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .comp-old {
+    background: #fff5f5;
+    border: 2px solid #feb2b2;
+  }
+
+  .comp-new {
+    background: #f0fff4;
+    border: 2px solid #68d391;
+  }
+
+  .comp-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .comp-old .comp-label { color: #c53030; }
+  .comp-new .comp-label { color: #22543d; }
+
+  .comp-price {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .comp-old .comp-price { color: #c53030; }
+  .comp-new .comp-price { color: #22543d; }
+
+  .comp-detail { font-size: 12px; color: #6b7394; }
+
+  /* FOOTER */
+  .page-footer {
+    position: absolute;
+    bottom: 0.5in;
+    left: 0.7in;
+    right: 0.7in;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #a0a5bd;
+    border-top: 1px solid #eceef5;
+    padding-top: 10px;
+  }
+
+  .page-footer .brand { font-weight: 600; color: #302b63; }
+
+  /* INTRO TEXT */
+  .intro-text {
+    font-size: 15px;
+    color: #4a4f6a;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #f0f4ff, #e8ecff);
+    border-left: 4px solid #302b63;
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+
+  .highlight-box p {
+    font-size: 14px;
+    color: #302b63;
+    font-weight: 500;
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-after: always; }
+    .page:last-child { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page cover">
+  <div class="cover-icon">🏠✨</div>
+  <h1>Airbnb Cleaning<br>Automation System</h1>
+  <p class="subtitle">Automated cleaner dispatch, real-time communication,<br>and complete job tracking — all on autopilot.</p>
+  <div class="client-badge">Prepared for Nicolas Mora</div>
+  <div class="cover-footer">
+    <span class="brand">Joe's Tech Solutions</span> &nbsp;·&nbsp; System Overview &nbsp;·&nbsp; March 2026
+  </div>
+</div>
+
+<!-- PAGE 2: HOW IT WORKS -->
+<div class="page">
+  <div class="section-title">
+    <div class="section-num">1</div>
+    <span>How It Works</span>
+  </div>
+
+  <p class="intro-text">
+    Your cleaning automation runs 24/7 in the background. It watches your Airbnb calendar,
+    automatically notifies your cleaner when a guest checks out, and keeps you updated on
+    everything — without you lifting a finger.
+  </p>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>📅 Calendar Monitoring</h3>
+        <p>The system checks your Airbnb calendar every 30 minutes for upcoming checkouts. When a guest is checking out today or tomorrow, it automatically triggers the next step.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>📲 Cleaner Gets Notified</h3>
+        <p>Your cleaner receives a Telegram message with the property address, how long the guest stayed, and any special instructions. It's personalized and clear — no confusion.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>💬 Two-Way Communication</h3>
+        <p>Your cleaner replies directly in Telegram. The system understands their response automatically — whether they're done cleaning, reporting an issue, or asking a question.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>🔔 Smart Routing</h3>
+        <p>If the cleaner reports a maintenance issue or has a question, you get notified immediately. If they just say "done," it's logged automatically and you don't get bothered.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>📊 Everything Tracked</h3>
+        <p>Every booking, every dispatch, and every cleaner response is logged to a Google Sheet you can access anytime. Full history, full visibility, zero manual data entry.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span class="brand">Joe's Tech Solutions</span>
+    <span>Page 2</span>
+  </div>
+</div>
+
+<!-- PAGE 3: ARCHITECTURE DIAGRAM -->
+<div class="page">
+  <div class="section-title">
+    <div class="section-num">2</div>
+    <span>System Architecture</span>
+  </div>
+
+  <div class="diagram-container">
+    <!-- Row 1: Airbnb -->
+    <div class="diagram-row">
+      <div class="diagram-node node-airbnb">
+        <div class="node-icon">🏡</div>
+        <div class="node-label">Airbnb Calendar</div>
+        <div class="node-sub">iCal feed (auto-updated)</div>
+      </div>
+    </div>
+
+    <div class="arrow-down">▼</div>
+    <div class="diagram-row"><div class="arrow-label">Polls every 30 minutes</div></div>
+
+    <!-- Row 2: Booking Monitor -->
+    <div class="diagram-row">
+      <div class="diagram-node node-n8n">
+        <div class="node-icon">🔍</div>
+        <div class="node-label">Booking Monitor</div>
+        <div class="node-sub">Detects upcoming checkouts</div>
+      </div>
+    </div>
+
+    <div class="arrow-down">▼</div>
+    <div class="diagram-row"><div class="arrow-label">Checkout found → dispatch</div></div>
+
+    <!-- Row 3: Dispatcher + Sheets side by side -->
+    <div class="diagram-row">
+      <div class="connector-h">
+        <div class="diagram-node node-sheets">
+          <div class="node-icon">📊</div>
+          <div class="node-label">Google Sheets</div>
+          <div class="node-sub">Bookings + dispatch + job logs</div>
+        </div>
+        <div class="connector-h-line"></div>
+        <div class="diagram-node node-n8n">
+          <div class="node-icon">📨</div>
+          <div class="node-label">Cleaner Dispatch</div>
+          <div class="node-sub">Composes & sends message</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-down" style="margin-left: 120px;">▼</div>
+    <div class="diagram-row"><div class="arrow-label">Sends via Telegram</div></div>
+
+    <!-- Row 4: Telegram Bot -->
+    <div class="diagram-row">
+      <div class="diagram-node node-telegram" style="min-width: 200px;">
+        <div class="node-icon">🤖</div>
+        <div class="node-label">Telegram Bot</div>
+        <div class="node-sub">@NickCleanBot — free, instant messaging</div>
+      </div>
+    </div>
+
+    <div class="arrow-down">▼ ▲</div>
+    <div class="diagram-row"><div class="arrow-label">Two-way messaging</div></div>
+
+    <!-- Row 5: Cleaner -->
+    <div class="diagram-row">
+      <div class="diagram-node node-cleaner">
+        <div class="node-icon">🧹</div>
+        <div class="node-label">Cleaner</div>
+        <div class="node-sub">Receives jobs, replies when done</div>
+      </div>
+    </div>
+
+    <div style="height: 20px"></div>
+
+    <!-- Row 6: Inbound handler branches -->
+    <div class="diagram-row">
+      <div class="diagram-node node-n8n" style="min-width: 240px;">
+        <div class="node-icon">🧠</div>
+        <div class="node-label">Smart Reply Handler</div>
+        <div class="node-sub">Reads cleaner messages → classifies → routes</div>
+      </div>
+    </div>
+
+    <div style="height: 12px"></div>
+
+    <div class="diagram-split">
+      <div class="diagram-branch">
+        <div class="connector-line"></div>
+        <div class="diagram-node" style="background: #d4edda; border: 2px solid #28a745; min-width: 120px; padding: 10px 14px;">
+          <div class="node-label" style="font-size: 12px;">✅ "Done"</div>
+          <div class="node-sub">Auto-logged</div>
+        </div>
+      </div>
+      <div class="diagram-branch">
+        <div class="connector-line"></div>
+        <div class="diagram-node" style="background: #f8d7da; border: 2px solid #dc3545; min-width: 120px; padding: 10px 14px;">
+          <div class="node-label" style="font-size: 12px;">⚠️ Issue</div>
+          <div class="node-sub">Alerts you</div>
+        </div>
+      </div>
+      <div class="diagram-branch">
+        <div class="connector-line"></div>
+        <div class="diagram-node" style="background: #d1ecf1; border: 2px solid #17a2b8; min-width: 120px; padding: 10px 14px;">
+          <div class="node-label" style="font-size: 12px;">❓ Question</div>
+          <div class="node-sub">Forwarded to you</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <p>💡 <strong>You only get notified when it matters.</strong> Routine completions are logged silently. Issues and questions are sent to you immediately.</p>
+  </div>
+
+  <div class="page-footer">
+    <span class="brand">Joe's Tech Solutions</span>
+    <span>Page 3</span>
+  </div>
+</div>
+
+<!-- PAGE 4: CLEANER RESPONSE TYPES + BENEFITS -->
+<div class="page">
+  <div class="section-title">
+    <div class="section-num">3</div>
+    <span>Smart Message Handling</span>
+  </div>
+
+  <p class="intro-text">
+    The system automatically understands what your cleaner means, so you never have to manually
+    check in or chase updates.
+  </p>
+
+  <table class="response-table">
+    <thead>
+      <tr>
+        <th>Cleaner Says</th>
+        <th>System Action</th>
+        <th>You See</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>"Done"</strong>, "Finished", "All cleaned"</td>
+        <td><span class="badge badge-green">Auto-logged</span> + sends thank you</td>
+        <td>Nothing (it's in your spreadsheet)</td>
+      </tr>
+      <tr>
+        <td><strong>"There's a broken pipe"</strong>, "Stain on carpet"</td>
+        <td><span class="badge badge-red">Alert sent</span> + logged as maintenance</td>
+        <td>Immediate Telegram notification with details</td>
+      </tr>
+      <tr>
+        <td><strong>"Where are the extra towels?"</strong></td>
+        <td><span class="badge badge-blue">Forwarded</span> to you</td>
+        <td>Message forwarded to your Telegram</td>
+      </tr>
+      <tr>
+        <td>Anything else</td>
+        <td><span class="badge badge-gray">Acknowledged</span> + logged</td>
+        <td>Nothing (auto-acknowledged)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="height: 28px"></div>
+
+  <div class="section-title">
+    <div class="section-num">4</div>
+    <span>Why This Works</span>
+  </div>
+
+  <div class="benefits-grid">
+    <div class="benefit-card">
+      <div class="benefit-icon">⏰</div>
+      <div class="benefit-title">Fully Automated</div>
+      <div class="benefit-desc">No manual texts, no forgotten checkouts. The system handles it 24/7.</div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">💬</div>
+      <div class="benefit-title">Real-Time Updates</div>
+      <div class="benefit-desc">Know instantly when cleaning is done or if something needs attention.</div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📊</div>
+      <div class="benefit-title">Full Paper Trail</div>
+      <div class="benefit-desc">Every booking, dispatch, and response logged in Google Sheets.</div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📈</div>
+      <div class="benefit-title">Scales With You</div>
+      <div class="benefit-desc">Add more properties and cleaners without changing the price.</div>
+    </div>
+  </div>
+
+  <div style="height: 20px"></div>
+
+  <div class="comparison-row">
+    <div class="comparison-card comp-old">
+      <div class="comp-label">Turno / Manual</div>
+      <div class="comp-price">$8+</div>
+      <div class="comp-detail">per property / month<br>+ manual texting + no customization</div>
+    </div>
+    <div class="comparison-card comp-new">
+      <div class="comp-label">Your System</div>
+      <div class="comp-price">$10</div>
+      <div class="comp-detail">flat / month — unlimited properties<br>fully automated + fully custom</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span class="brand">Joe's Tech Solutions</span>
+    <span>Page 4</span>
+  </div>
+</div>
+
+<!-- PAGE 5: WHAT'S NEXT -->
+<div class="page">
+  <div class="section-title">
+    <div class="section-num">5</div>
+    <span>Getting Started</span>
+  </div>
+
+  <p class="intro-text">
+    Setup is simple. Here's everything we need from you to go live:
+  </p>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Share Your Airbnb Calendar Link</h3>
+        <p>Go to your Airbnb hosting dashboard → Calendar → Export Calendar. Copy the iCal link and send it to us. That's how we see your bookings.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Your Cleaner Downloads Telegram</h3>
+        <p>Telegram is a free messaging app (like WhatsApp). Your cleaner downloads it, and we connect them to the bot. Takes 2 minutes.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Tell Us Your Property Details</h3>
+        <p>Property address, cleaner's name, and any standing instructions (e.g., "always check patio furniture"). We configure it all for you.</p>
+      </div>
+      <div class="step-connector"></div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>We Flip the Switch</h3>
+        <p>Once everything is configured, the system goes live. Your next checkout will be handled automatically. You just sit back and watch it work.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <p>🚀 <strong>No software to install. No apps to learn. No setup fee.</strong><br>
+    Everything runs in the cloud. You interact through Telegram — an app you already know how to use.</p>
+  </div>
+
+  <div style="height: 40px"></div>
+
+  <div style="text-align: center; padding: 28px; background: linear-gradient(135deg, #f8f9ff, #eef1ff); border-radius: 16px; border: 1px solid #e2e6f0;">
+    <div style="font-size: 28px; margin-bottom: 8px;">🤝</div>
+    <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px;">Ready to Automate?</div>
+    <div style="font-size: 14px; color: #6b7394; margin-bottom: 16px;">Questions? Reach out anytime.</div>
+    <div style="font-size: 15px; color: #302b63; font-weight: 600;">Joe &nbsp;·&nbsp; committer@example.com</div>
+  </div>
+
+  <div class="page-footer">
+    <span class="brand">Joe's Tech Solutions</span>
+    <span>Page 5</span>
+  </div>
+</div>
+
+</body>
+</html>
