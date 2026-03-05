@@ -1,4 +1,4 @@
-# Nick Mora — Airbnb Cleaning Automation
+# Nick M — Airbnb Cleaning Automation
 
 **Client:** Nicolas Mora (<nickmora92@yahoo.com>)
 **Project:** Automated cleaner dispatch + two-way Telegram communication
