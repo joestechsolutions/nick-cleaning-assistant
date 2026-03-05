@@ -1,6 +1,6 @@
-# Nick M — Airbnb Cleaning Automation
+# Client X — Airbnb Cleaning Automation
 
-**Client:** Nick M
+**Client:** Client X
 **Project:** Automated cleaner dispatch + two-way Telegram communication
 **Status:** Production-ready — bugs fixed, pending go-live with real data
 **Pricing:** $8/mo flat retainer (no setup fee, unlimited properties)
@@ -117,7 +117,7 @@
 | --- | --- |
 | Monitor → Dispatch had no connection (dead end) | Added `Trigger Dispatch` HTTP Request node that POSTs to dispatch webhook |
 | Morning Dispatch Check connected to nothing | Added `Morning Check Payload` code node wired to `AI Compose Cleaning Message` |
-| Hardcoded chat ID `PLACEHOLDER_CHAT_ID` in Inbound Handler | Now reads from `$env.NICK_CLEANER_TELEGRAM_CHAT_ID` with fallback |
+| Hardcoded chat ID in Inbound Handler | Now reads from `$env.NICK_CLEANER_TELEGRAM_CHAT_ID` with fallback |
 | `getUpdates` had no offset/dedup (reprocessed all on restart) | Added `Acknowledge Updates` node that calls `getUpdates?offset=maxId+1` to mark processed |
 | No duplicate dispatch prevention | Added n8n Data Table (`b8BSdZL1vF0I8m1L`) to track dispatched UIDs; `Filter New Only` code node skips already-dispatched bookings |
 | Broken `Update State` set node in Inbound Handler | Removed; Process & Filter now returns single item with maxUpdateId for acknowledgment |
@@ -131,14 +131,14 @@
 
 | Variable | Value | Description |
 | --- | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | `8772704912:AAFA5uB-...` | @NickCleanBot token |
-| `NICK_CLEANER_TELEGRAM_CHAT_ID` | `PLACEHOLDER_CHAT_ID` | Test cleaner (Joe) |
-| `NICK_TRACKER_SHEET_ID` | `16kftTiwJs6VmNVr...` | Google Sheets tracker |
-| `NICK_DEFAULT_PROPERTY_ADDRESS` | `YOUR_PROPERTY_ADDRESS, LA 90068` | Default property |
-| `NICK_CLEANER_NAME` | `YOUR_CLEANER_NAME` | Test cleaner name |
+| `TELEGRAM_BOT_TOKEN` | `<TELEGRAM_BOT_TOKEN>` | Bot token |
+| `NICK_CLEANER_TELEGRAM_CHAT_ID` | `<NICK_CLEANER_TELEGRAM_CHAT_ID>` | Cleaner Telegram ID |
+| `NICK_TRACKER_SHEET_ID` | `<NICK_TRACKER_SHEET_ID>` | Google Sheets tracker |
+| `NICK_DEFAULT_PROPERTY_ADDRESS` | `<NICK_DEFAULT_PROPERTY_ADDRESS>` | Default property |
+| `NICK_CLEANER_NAME` | `<NICK_CLEANER_NAME>` | Cleaner name |
 | `AIRBNB_ICAL_URL_NICK` | `http://localhost:8199/demo-calendar.ics` | Demo calendar |
 | `N8N_BLOCK_ENV_ACCESS_IN_NODE` | `false` | Allow Code nodes to access env vars |
-| `N8N_API_KEY` | (auto-generated JWT) | Used by workflows to call Data Table API |
+| `N8N_API_KEY` | `<N8N_API_KEY>` | Used by workflows to call Data Table API |
 
 ## Telegram Bot
 
@@ -146,13 +146,13 @@
 | --- | --- |
 | Bot name | NickCleanBot |
 | Username | @NickCleanBot |
-| Bot ID | 8772704912 |
+| Bot ID | `<BOT_ID>` |
 | Token | Stored in N8N env `TELEGRAM_BOT_TOKEN` |
-| Test cleaner | Joe (chat ID: PLACEHOLDER_CHAT_ID) |
+| Cleaner | `<NICK_CLEANER_TELEGRAM_CHAT_ID>` |
 
 ## Google Sheets Tracker
 
-**Sheet ID:** `16kftTiwJs6VmNVrdGag4L9vh7JAfCKMKeRbphlQGPnU`
+**Sheet ID:** `<NICK_TRACKER_SHEET_ID>`
 
 **Tabs:**
 
@@ -203,7 +203,7 @@ When Nick is ready to go live, swap these env vars and do these manual steps:
 | `workflow-inbound-live.json` | Inbound Message Handler workflow (n8n export) |
 | `PROJECT.md` | This doc |
 | `README.md` | Public-facing project overview |
-| `Airbnb Cleaning Automation.pdf` | Client proposal |
+| `client-proposal.pdf` | Client proposal |
 
 ## Pricing Model
 
