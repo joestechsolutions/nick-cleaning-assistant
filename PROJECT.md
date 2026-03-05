@@ -3,7 +3,7 @@
 **Client:** Nicolas Mora (nickmora92@yahoo.com)
 **Project:** Automated cleaner dispatch + two-way Telegram communication
 **Status:** Beta — End-to-end testing phase
-**Pricing:** $10/mo flat retainer (no setup fee, unlimited properties)
+**Pricing:** $8/mo flat retainer (no setup fee, unlimited properties)
 **Started:** March 4, 2026
 
 ---
@@ -173,7 +173,7 @@ Served from `localhost:8199/demo-calendar.ics`
 
 | | Turno (competitor) | Our solution |
 |---|---|---|
-| Per unit | ~$8/property/mo | $10/mo flat (unlimited) |
+| Per unit | ~$8/property/mo | $8/mo flat (unlimited) |
 | Setup fee | Varies | $0 |
 | Messaging | Built-in (limited) | Telegram ($0) |
 | Customization | None | Full (we own the code) |
