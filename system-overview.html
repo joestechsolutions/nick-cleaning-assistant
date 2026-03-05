@@ -3,15 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Airbnb Cleaning Automation — System Overview</title>
+<title>Airbnb Cleaning Automation — System Overview | Joe's Tech Solutions</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --jts-blue: #0EA5E9;
+    --jts-cyan: #06B6D4;
+    --jts-dark: #0d0d12;
+    --jts-dark2: #1c1c26;
+    --jts-light: #f0f9ff;
+    --jts-gray: #94a3b8;
+    --jts-text: #e2e8f0;
+  }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Inter', -apple-system, sans-serif;
-    color: #1a1a2e;
+    color: #1e293b;
     background: #fff;
     line-height: 1.6;
   }
@@ -26,52 +36,81 @@
 
   .page:last-child { page-break-after: avoid; }
 
-  /* COVER PAGE */
+  /* ========== COVER PAGE ========== */
   .cover {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    background: linear-gradient(160deg, #0d0d12 0%, #111827 40%, #0c1a2e 70%, #0d0d12 100%);
     color: #fff;
     min-height: 11in;
     padding: 1in;
+    position: relative;
+    overflow: hidden;
   }
 
-  .cover-icon {
-    font-size: 72px;
-    margin-bottom: 24px;
+  /* Glow effect behind logo */
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    margin-bottom: 28px;
+    box-shadow: 0 0 40px rgba(14, 165, 233, 0.3);
+    position: relative;
+    z-index: 1;
   }
 
   .cover h1 {
-    font-size: 42px;
-    font-weight: 800;
-    letter-spacing: -1px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
     margin-bottom: 12px;
-    background: linear-gradient(90deg, #fff, #a8c0ff);
+    background: linear-gradient(135deg, #fff 0%, #0EA5E9 50%, #06B6D4 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    position: relative;
+    z-index: 1;
   }
 
   .cover .subtitle {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 300;
-    color: #a8b4d4;
-    margin-bottom: 40px;
+    color: #94a3b8;
+    margin-bottom: 44px;
+    max-width: 440px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
   }
 
   .cover .client-badge {
     display: inline-block;
     padding: 10px 28px;
-    border: 2px solid rgba(168, 192, 255, 0.3);
+    border: 1.5px solid rgba(14, 165, 233, 0.4);
     border-radius: 50px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #a8c0ff;
-    letter-spacing: 1px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0EA5E9;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
+    position: relative;
+    z-index: 1;
   }
 
   .cover-footer {
@@ -80,58 +119,147 @@
     left: 0;
     right: 0;
     text-align: center;
-    color: #6b7394;
+    color: #475569;
     font-size: 13px;
     font-weight: 400;
+    z-index: 1;
   }
 
   .cover-footer .brand {
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
-    color: #a8c0ff;
+    color: #0EA5E9;
   }
 
-  /* SECTION HEADERS */
+  /* ========== PAGE HEADER ========== */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #0EA5E9;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-header-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  .page-header-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0d0d12;
+  }
+
+  .page-header-doc {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ========== SECTION HEADERS ========== */
   .section-num {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, #302b63, #24243e);
+    background: linear-gradient(135deg, #0EA5E9, #06B6D4);
     color: #fff;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 36px;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 16px;
     font-weight: 700;
-    margin-right: 12px;
-    vertical-align: middle;
+    margin-right: 14px;
+    flex-shrink: 0;
   }
 
   .section-title {
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 26px;
     font-weight: 700;
-    color: #1a1a2e;
-    margin-bottom: 24px;
+    color: #0d0d12;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     letter-spacing: -0.5px;
   }
 
-  .section-title span { vertical-align: middle; }
+  /* ========== FLOW STEPS ========== */
+  .flow-steps { margin: 20px 0; }
 
-  /* ARCHITECTURE DIAGRAM */
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #0EA5E9, #06B6D4);
+    color: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-right: 18px;
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+  }
+
+  .step-content h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0d0d12;
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  .step-connector {
+    position: absolute;
+    left: 21px;
+    top: 48px;
+    width: 2px;
+    height: calc(100% - 20px);
+    background: linear-gradient(to bottom, #0EA5E9, #e2e8f0);
+  }
+
+  /* ========== ARCHITECTURE DIAGRAM ========== */
   .diagram-container {
-    background: #fafbff;
-    border: 1px solid #e2e6f0;
+    background: linear-gradient(160deg, #f8fafc, #f0f9ff);
+    border: 1px solid #e0f2fe;
     border-radius: 16px;
-    padding: 36px 24px;
-    margin: 20px 0 28px 0;
+    padding: 32px 20px;
+    margin: 16px 0 24px 0;
   }
 
   .diagram-row {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .diagram-node {
@@ -139,36 +267,34 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 14px 20px;
+    padding: 12px 18px;
     border-radius: 12px;
     text-align: center;
-    min-width: 160px;
-    position: relative;
+    min-width: 155px;
   }
 
-  .node-icon { font-size: 28px; margin-bottom: 6px; }
-  .node-label { font-size: 13px; font-weight: 600; color: #1a1a2e; }
-  .node-sub { font-size: 11px; color: #6b7394; margin-top: 2px; }
+  .node-icon { font-size: 26px; margin-bottom: 5px; }
+  .node-label { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: #0d0d12; }
+  .node-sub { font-size: 10.5px; color: #64748b; margin-top: 2px; }
 
-  .node-airbnb { background: #ff5a5f20; border: 2px solid #ff5a5f; }
-  .node-n8n { background: #ea4b7120; border: 2px solid #ea4b71; }
-  .node-telegram { background: #0088cc20; border: 2px solid #0088cc; }
-  .node-sheets { background: #34a85320; border: 2px solid #34a853; }
-  .node-nick { background: #f9a82520; border: 2px solid #f9a825; }
-  .node-cleaner { background: #7c4dff20; border: 2px solid #7c4dff; }
+  .node-airbnb { background: #ff5a5f15; border: 2px solid #ff5a5f; }
+  .node-n8n { background: rgba(14, 165, 233, 0.08); border: 2px solid #0EA5E9; }
+  .node-telegram { background: #0088cc12; border: 2px solid #0088cc; }
+  .node-sheets { background: #34a85312; border: 2px solid #34a853; }
+  .node-cleaner { background: #8b5cf612; border: 2px solid #8b5cf6; }
 
   .arrow-down {
     display: flex;
     justify-content: center;
-    padding: 4px 0;
-    color: #8b92b0;
-    font-size: 22px;
+    padding: 3px 0;
+    color: #0EA5E9;
+    font-size: 20px;
   }
 
   .arrow-label {
     font-size: 10px;
-    color: #8b92b0;
-    font-weight: 500;
+    color: #64748b;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 8px;
@@ -177,7 +303,7 @@
   .diagram-split {
     display: flex;
     justify-content: center;
-    gap: 32px;
+    gap: 28px;
     margin-top: 4px;
   }
 
@@ -185,14 +311,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
-  .connector-line {
-    width: 2px;
-    height: 16px;
-    background: #c8cde0;
-  }
+  .connector-line { width: 2px; height: 14px; background: #0EA5E9; }
 
   .connector-h {
     display: flex;
@@ -200,63 +322,9 @@
     gap: 12px;
   }
 
-  .connector-h-line {
-    width: 40px;
-    height: 2px;
-    background: #c8cde0;
-  }
+  .connector-h-line { width: 36px; height: 2px; background: #cbd5e1; }
 
-  /* FLOW STEPS */
-  .flow-steps {
-    margin: 20px 0;
-  }
-
-  .flow-step {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    position: relative;
-  }
-
-  .step-num {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, #302b63, #5b4d9e);
-    color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    margin-right: 18px;
-    box-shadow: 0 4px 12px rgba(48, 43, 99, 0.25);
-  }
-
-  .step-content h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a1a2e;
-    margin-bottom: 4px;
-  }
-
-  .step-content p {
-    font-size: 13.5px;
-    color: #4a4f6a;
-    line-height: 1.55;
-  }
-
-  .step-connector {
-    position: absolute;
-    left: 21px;
-    top: 48px;
-    width: 2px;
-    height: calc(100% - 24px);
-    background: #e2e6f0;
-  }
-
-  /* RESPONSE TYPES TABLE */
+  /* ========== TABLE ========== */
   .response-table {
     width: 100%;
     border-collapse: separate;
@@ -264,13 +332,14 @@
     margin: 16px 0;
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #e2e6f0;
+    border: 1px solid #e2e8f0;
   }
 
   .response-table th {
-    background: #302b63;
+    background: linear-gradient(135deg, #0d0d12, #1e293b);
     color: #fff;
     padding: 12px 16px;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -281,12 +350,12 @@
   .response-table td {
     padding: 12px 16px;
     font-size: 13px;
-    border-bottom: 1px solid #f0f1f5;
-    color: #4a4f6a;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
   }
 
   .response-table tr:last-child td { border-bottom: none; }
-  .response-table tr:nth-child(even) td { background: #fafbff; }
+  .response-table tr:nth-child(even) td { background: #f8fafc; }
 
   .badge {
     display: inline-block;
@@ -296,32 +365,41 @@
     font-weight: 600;
   }
 
-  .badge-green { background: #d4edda; color: #155724; }
-  .badge-red { background: #f8d7da; color: #721c24; }
-  .badge-blue { background: #d1ecf1; color: #0c5460; }
-  .badge-gray { background: #e9ecef; color: #495057; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #e0f2fe; color: #075985; }
+  .badge-gray { background: #f1f5f9; color: #475569; }
 
-  /* KEY BENEFITS */
+  /* ========== BENEFITS ========== */
   .benefits-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin: 20px 0;
+    gap: 14px;
+    margin: 18px 0;
   }
 
   .benefit-card {
-    background: #fafbff;
-    border: 1px solid #e2e6f0;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 20px;
+    padding: 18px;
     text-align: center;
+    transition: border-color 0.2s;
   }
 
-  .benefit-icon { font-size: 32px; margin-bottom: 8px; }
-  .benefit-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
-  .benefit-desc { font-size: 12px; color: #6b7394; }
+  .benefit-icon { font-size: 30px; margin-bottom: 6px; }
 
-  /* COMPARISON */
+  .benefit-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0d0d12;
+    margin-bottom: 4px;
+  }
+
+  .benefit-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+  /* ========== COMPARISON ========== */
   .comparison-row {
     display: flex;
     gap: 20px;
@@ -335,17 +413,11 @@
     text-align: center;
   }
 
-  .comp-old {
-    background: #fff5f5;
-    border: 2px solid #feb2b2;
-  }
-
-  .comp-new {
-    background: #f0fff4;
-    border: 2px solid #68d391;
-  }
+  .comp-old { background: #fef2f2; border: 2px solid #fca5a5; }
+  .comp-new { background: #ecfdf5; border: 2px solid #6ee7b7; }
 
   .comp-label {
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -353,47 +425,25 @@
     margin-bottom: 8px;
   }
 
-  .comp-old .comp-label { color: #c53030; }
-  .comp-new .comp-label { color: #22543d; }
+  .comp-old .comp-label { color: #dc2626; }
+  .comp-new .comp-label { color: #059669; }
 
   .comp-price {
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 36px;
     font-weight: 800;
     margin-bottom: 4px;
   }
 
-  .comp-old .comp-price { color: #c53030; }
-  .comp-new .comp-price { color: #22543d; }
+  .comp-old .comp-price { color: #dc2626; }
+  .comp-new .comp-price { color: #059669; }
 
-  .comp-detail { font-size: 12px; color: #6b7394; }
+  .comp-detail { font-size: 12px; color: #64748b; }
 
-  /* FOOTER */
-  .page-footer {
-    position: absolute;
-    bottom: 0.5in;
-    left: 0.7in;
-    right: 0.7in;
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: #a0a5bd;
-    border-top: 1px solid #eceef5;
-    padding-top: 10px;
-  }
-
-  .page-footer .brand { font-weight: 600; color: #302b63; }
-
-  /* INTRO TEXT */
-  .intro-text {
-    font-size: 15px;
-    color: #4a4f6a;
-    line-height: 1.7;
-    margin-bottom: 24px;
-  }
-
+  /* ========== HIGHLIGHT BOX ========== */
   .highlight-box {
-    background: linear-gradient(135deg, #f0f4ff, #e8ecff);
-    border-left: 4px solid #302b63;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-left: 4px solid #0EA5E9;
     border-radius: 0 12px 12px 0;
     padding: 16px 20px;
     margin: 20px 0;
@@ -401,8 +451,37 @@
 
   .highlight-box p {
     font-size: 14px;
-    color: #302b63;
+    color: #0c4a6e;
     font-weight: 500;
+  }
+
+  /* ========== INTRO TEXT ========== */
+  .intro-text {
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+
+  /* ========== FOOTER ========== */
+  .page-footer {
+    position: absolute;
+    bottom: 0.5in;
+    left: 0.7in;
+    right: 0.7in;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 10px;
+  }
+
+  .page-footer .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: #0EA5E9;
   }
 
   @media print {
@@ -414,19 +493,28 @@
 </head>
 <body>
 
-<!-- PAGE 1: COVER -->
+<!-- ==================== PAGE 1: COVER ==================== -->
 <div class="page cover">
-  <div class="cover-icon">🏠✨</div>
+  <img src="file:///home/lurkr-bot/jts-build/public/logo-icon-v3.png" class="cover-logo" alt="JTS Logo">
   <h1>Airbnb Cleaning<br>Automation System</h1>
-  <p class="subtitle">Automated cleaner dispatch, real-time communication,<br>and complete job tracking — all on autopilot.</p>
+  <p class="subtitle">Automated cleaner dispatch, real-time communication,
+  and complete job tracking — all on autopilot.</p>
   <div class="client-badge">Prepared for Nicolas Mora</div>
   <div class="cover-footer">
     <span class="brand">Joe's Tech Solutions</span> &nbsp;·&nbsp; System Overview &nbsp;·&nbsp; March 2026
   </div>
 </div>
 
-<!-- PAGE 2: HOW IT WORKS -->
+<!-- ==================== PAGE 2: HOW IT WORKS ==================== -->
 <div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <img src="file:///home/lurkr-bot/jts-build/public/logo-icon-v3.png" class="page-header-logo" alt="JTS">
+      <span class="page-header-brand">Joe's Tech Solutions</span>
+    </div>
+    <span class="page-header-doc">System Overview</span>
+  </div>
+
   <div class="section-title">
     <div class="section-num">1</div>
     <span>How It Works</span>
@@ -486,12 +574,20 @@
 
   <div class="page-footer">
     <span class="brand">Joe's Tech Solutions</span>
-    <span>Page 2</span>
+    <span>joestechsolutions.com &nbsp;·&nbsp; Page 2</span>
   </div>
 </div>
 
-<!-- PAGE 3: ARCHITECTURE DIAGRAM -->
+<!-- ==================== PAGE 3: ARCHITECTURE DIAGRAM ==================== -->
 <div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <img src="file:///home/lurkr-bot/jts-build/public/logo-icon-v3.png" class="page-header-logo" alt="JTS">
+      <span class="page-header-brand">Joe's Tech Solutions</span>
+    </div>
+    <span class="page-header-doc">System Overview</span>
+  </div>
+
   <div class="section-title">
     <div class="section-num">2</div>
     <span>System Architecture</span>
@@ -503,7 +599,7 @@
       <div class="diagram-node node-airbnb">
         <div class="node-icon">🏡</div>
         <div class="node-label">Airbnb Calendar</div>
-        <div class="node-sub">iCal feed (auto-updated)</div>
+        <div class="node-sub">iCal feed (auto-updated by Airbnb)</div>
       </div>
     </div>
 
@@ -522,7 +618,7 @@
     <div class="arrow-down">▼</div>
     <div class="diagram-row"><div class="arrow-label">Checkout found → dispatch</div></div>
 
-    <!-- Row 3: Dispatcher + Sheets side by side -->
+    <!-- Row 3: Dispatcher + Sheets -->
     <div class="diagram-row">
       <div class="connector-h">
         <div class="diagram-node node-sheets">
@@ -539,7 +635,7 @@
       </div>
     </div>
 
-    <div class="arrow-down" style="margin-left: 120px;">▼</div>
+    <div class="arrow-down" style="margin-left: 100px;">▼</div>
     <div class="diagram-row"><div class="arrow-label">Sends via Telegram</div></div>
 
     <!-- Row 4: Telegram Bot -->
@@ -547,7 +643,7 @@
       <div class="diagram-node node-telegram" style="min-width: 200px;">
         <div class="node-icon">🤖</div>
         <div class="node-label">Telegram Bot</div>
-        <div class="node-sub">@NickCleanBot — free, instant messaging</div>
+        <div class="node-sub">Free, instant, two-way messaging</div>
       </div>
     </div>
 
@@ -559,41 +655,41 @@
       <div class="diagram-node node-cleaner">
         <div class="node-icon">🧹</div>
         <div class="node-label">Cleaner</div>
-        <div class="node-sub">Receives jobs, replies when done</div>
+        <div class="node-sub">Receives jobs · replies when done</div>
       </div>
     </div>
 
-    <div style="height: 20px"></div>
+    <div style="height: 16px"></div>
 
-    <!-- Row 6: Inbound handler branches -->
+    <!-- Row 6: Smart handler -->
     <div class="diagram-row">
-      <div class="diagram-node node-n8n" style="min-width: 240px;">
+      <div class="diagram-node node-n8n" style="min-width: 230px;">
         <div class="node-icon">🧠</div>
         <div class="node-label">Smart Reply Handler</div>
-        <div class="node-sub">Reads cleaner messages → classifies → routes</div>
+        <div class="node-sub">Reads messages → classifies → routes</div>
       </div>
     </div>
 
-    <div style="height: 12px"></div>
+    <div style="height: 10px"></div>
 
     <div class="diagram-split">
       <div class="diagram-branch">
         <div class="connector-line"></div>
-        <div class="diagram-node" style="background: #d4edda; border: 2px solid #28a745; min-width: 120px; padding: 10px 14px;">
+        <div class="diagram-node" style="background: #dcfce7; border: 2px solid #22c55e; min-width: 115px; padding: 10px 12px;">
           <div class="node-label" style="font-size: 12px;">✅ "Done"</div>
           <div class="node-sub">Auto-logged</div>
         </div>
       </div>
       <div class="diagram-branch">
         <div class="connector-line"></div>
-        <div class="diagram-node" style="background: #f8d7da; border: 2px solid #dc3545; min-width: 120px; padding: 10px 14px;">
+        <div class="diagram-node" style="background: #fee2e2; border: 2px solid #ef4444; min-width: 115px; padding: 10px 12px;">
           <div class="node-label" style="font-size: 12px;">⚠️ Issue</div>
           <div class="node-sub">Alerts you</div>
         </div>
       </div>
       <div class="diagram-branch">
         <div class="connector-line"></div>
-        <div class="diagram-node" style="background: #d1ecf1; border: 2px solid #17a2b8; min-width: 120px; padding: 10px 14px;">
+        <div class="diagram-node" style="background: #e0f2fe; border: 2px solid #0EA5E9; min-width: 115px; padding: 10px 12px;">
           <div class="node-label" style="font-size: 12px;">❓ Question</div>
           <div class="node-sub">Forwarded to you</div>
         </div>
@@ -602,17 +698,25 @@
   </div>
 
   <div class="highlight-box">
-    <p>💡 <strong>You only get notified when it matters.</strong> Routine completions are logged silently. Issues and questions are sent to you immediately.</p>
+    <p>💡 <strong>You only get notified when it matters.</strong> Routine completions are logged silently. Issues and questions reach you immediately.</p>
   </div>
 
   <div class="page-footer">
     <span class="brand">Joe's Tech Solutions</span>
-    <span>Page 3</span>
+    <span>joestechsolutions.com &nbsp;·&nbsp; Page 3</span>
   </div>
 </div>
 
-<!-- PAGE 4: CLEANER RESPONSE TYPES + BENEFITS -->
+<!-- ==================== PAGE 4: SMART HANDLING + BENEFITS ==================== -->
 <div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <img src="file:///home/lurkr-bot/jts-build/public/logo-icon-v3.png" class="page-header-logo" alt="JTS">
+      <span class="page-header-brand">Joe's Tech Solutions</span>
+    </div>
+    <span class="page-header-doc">System Overview</span>
+  </div>
+
   <div class="section-title">
     <div class="section-num">3</div>
     <span>Smart Message Handling</span>
@@ -638,9 +742,9 @@
         <td>Nothing (it's in your spreadsheet)</td>
       </tr>
       <tr>
-        <td><strong>"There's a broken pipe"</strong>, "Stain on carpet"</td>
+        <td><strong>"Broken pipe in bathroom"</strong></td>
         <td><span class="badge badge-red">Alert sent</span> + logged as maintenance</td>
-        <td>Immediate Telegram notification with details</td>
+        <td>Immediate Telegram notification</td>
       </tr>
       <tr>
         <td><strong>"Where are the extra towels?"</strong></td>
@@ -655,7 +759,7 @@
     </tbody>
   </table>
 
-  <div style="height: 28px"></div>
+  <div style="height: 24px"></div>
 
   <div class="section-title">
     <div class="section-num">4</div>
@@ -685,7 +789,7 @@
     </div>
   </div>
 
-  <div style="height: 20px"></div>
+  <div style="height: 16px"></div>
 
   <div class="comparison-row">
     <div class="comparison-card comp-old">
@@ -702,12 +806,20 @@
 
   <div class="page-footer">
     <span class="brand">Joe's Tech Solutions</span>
-    <span>Page 4</span>
+    <span>joestechsolutions.com &nbsp;·&nbsp; Page 4</span>
   </div>
 </div>
 
-<!-- PAGE 5: WHAT'S NEXT -->
+<!-- ==================== PAGE 5: GETTING STARTED ==================== -->
 <div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <img src="file:///home/lurkr-bot/jts-build/public/logo-icon-v3.png" class="page-header-logo" alt="JTS">
+      <span class="page-header-brand">Joe's Tech Solutions</span>
+    </div>
+    <span class="page-header-doc">System Overview</span>
+  </div>
+
   <div class="section-title">
     <div class="section-num">5</div>
     <span>Getting Started</span>
@@ -722,7 +834,7 @@
       <div class="step-num">1</div>
       <div class="step-content">
         <h3>Share Your Airbnb Calendar Link</h3>
-        <p>Go to your Airbnb hosting dashboard → Calendar → Export Calendar. Copy the iCal link and send it to us. That's how we see your bookings.</p>
+        <p>Go to your Airbnb hosting dashboard, then Calendar, then Export Calendar. Copy the iCal link and send it to us. That's how we see your bookings.</p>
       </div>
       <div class="step-connector"></div>
     </div>
@@ -759,18 +871,20 @@
     Everything runs in the cloud. You interact through Telegram — an app you already know how to use.</p>
   </div>
 
-  <div style="height: 40px"></div>
+  <div style="height: 36px"></div>
 
-  <div style="text-align: center; padding: 28px; background: linear-gradient(135deg, #f8f9ff, #eef1ff); border-radius: 16px; border: 1px solid #e2e6f0;">
-    <div style="font-size: 28px; margin-bottom: 8px;">🤝</div>
-    <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px;">Ready to Automate?</div>
-    <div style="font-size: 14px; color: #6b7394; margin-bottom: 16px;">Questions? Reach out anytime.</div>
-    <div style="font-size: 15px; color: #302b63; font-weight: 600;">Joe &nbsp;·&nbsp; committer@example.com</div>
+  <div style="text-align: center; padding: 28px; background: linear-gradient(160deg, #0d0d12, #1e293b); border-radius: 16px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, transparent 70%); pointer-events: none;"></div>
+    <div style="font-size: 28px; margin-bottom: 8px; position: relative;">🤝</div>
+    <div style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; position: relative;">Ready to Automate?</div>
+    <div style="font-size: 14px; color: #94a3b8; margin-bottom: 16px; position: relative;">Questions? Reach out anytime.</div>
+    <div style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; color: #0EA5E9; font-weight: 600; position: relative;">Joe &nbsp;·&nbsp; committer@example.com</div>
+    <div style="font-size: 13px; color: #64748b; margin-top: 4px; position: relative;">joestechsolutions.com</div>
   </div>
 
   <div class="page-footer">
     <span class="brand">Joe's Tech Solutions</span>
-    <span>Page 5</span>
+    <span>joestechsolutions.com &nbsp;·&nbsp; Page 5</span>
   </div>
 </div>
 
