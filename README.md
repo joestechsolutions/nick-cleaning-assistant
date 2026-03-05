@@ -1,4 +1,4 @@
-# Airbnb Cleaning Automation — Nick Mora
+# Airbnb Cleaning Automation — Nick M.
 
 Automated cleaner dispatch, real-time communication, and complete job tracking for Airbnb hosts.
 
