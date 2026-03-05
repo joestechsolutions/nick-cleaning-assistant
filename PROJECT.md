@@ -1,6 +1,6 @@
 # Nick M — Airbnb Cleaning Automation
 
-**Client:** Nicolas Mora (<nickmora92@yahoo.com>)
+**Client:** Nick M
 **Project:** Automated cleaner dispatch + two-way Telegram communication
 **Status:** Production-ready — bugs fixed, pending go-live with real data
 **Pricing:** $8/mo flat retainer (no setup fee, unlimited properties)
